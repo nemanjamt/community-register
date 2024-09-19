@@ -33,4 +33,3 @@ build/
 
 /src/main/resources/pdfs/*
 /src/main/resources/data/*
-!/src/main/resources/data/family-path.csv
