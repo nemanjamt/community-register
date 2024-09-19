@@ -5,5 +5,5 @@ To run the project, you need to have **JAVA 19** and **MAVEN** installed. Then, 
 
 After that, a `target` folder will be created, and you need to navigate to that folder.
 
-To run the application, use the following command:
+To run the application, use the following command:<br>
 `java -jar CommunityRegister-1.0-SNAPSHOT-jar-with-dependencies.jar`
