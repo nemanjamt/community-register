@@ -8,8 +8,7 @@ import community.register.view.models.FamiliesSearchTableModel;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 public class SearchFamiliesPanel extends JPanel {
 
@@ -140,11 +139,71 @@ public class SearchFamiliesPanel extends JPanel {
                panelChangeListener.onPanelChange("changeFamilyPanel", h.getId());
             }
        });
-
+        configureNavigation(lastNameField, false, true);
+        configureNavigation(streetField, true, true);
+        configureNavigation(orderNumberField, true, true);
+        configureNavigation(searchButton, true, false);
+        simulateArrowFocus(searchButton);
     }
 
     public void setPanelChangeListener(PanelChangeListener panelChangeListener) {
         this.panelChangeListener = panelChangeListener;
     }
+
+    private void configureNavigation(JComponent component, boolean allowUp, boolean allowDown) {
+        InputMap im = component.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap am = component.getActionMap();
+
+        im.put(KeyStroke.getKeyStroke("ENTER"), "enter");
+
+        if(allowUp){
+            im.put(KeyStroke.getKeyStroke("UP"), "up");
+            am.put("up", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    component.transferFocusBackward();
+                }
+            });
+        }
+
+        if (allowDown) {
+            im.put(KeyStroke.getKeyStroke("DOWN"), "down");
+            am.put("down", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    component.transferFocus();
+                }
+            });
+
+        }
+
+        am.put("enter", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (component instanceof JButton button) {
+                    button.doClick();
+                    lastNameField.requestFocus();
+                } else {
+                    component.transferFocus();
+                }
+            }
+        });
+    }
+
+    private void simulateArrowFocus(JButton button) {
+        button.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                button.setFocusPainted(false);
+                button.getModel().setRollover(true);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                button.getModel().setRollover(false);
+            }
+        });
+    }
+
 
 }

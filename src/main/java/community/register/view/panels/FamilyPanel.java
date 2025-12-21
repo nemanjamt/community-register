@@ -89,11 +89,11 @@ public abstract class FamilyPanel extends JPanel implements FamilyMemberFormList
     }
 
     protected void setSaveChangesContent(String content) {
-        this.familyForm.saveChangesButton.setText(content);
+        this.familyForm.getSaveButton().setText(content);
     }
 
     protected void setDeleteButtonVisible(boolean isVisible) {
-        this.familyForm.deleteButton.setVisible(isVisible);
+        this.familyForm.getDeleteButton().setVisible(isVisible);
     }
 
     @Override

@@ -5,200 +5,262 @@ import community.register.utils.FamilyFormListener;
 
 import javax.swing.*;
 import java.awt.*;
-
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class FamilyForm extends JPanel {
 
-    protected JLabel orderNumberLabel;
-    protected JLabel noteLabel;
-    protected JLabel placeLabel;
-    protected JLabel streetLabel;
-    protected JLabel patronSaintLabel;
-    protected JLabel secondPatronSaintLabel;
-    protected JLabel blessedHomeLabel;
-    protected JLabel phoneNumberLabel;
+    private JTextField placeField;
+    private JTextField streetField;
+    private JTextField patronSaintField;
+    private JTextField secondPatronSaintField;
+    private JTextField phoneNumberField;
+    private JTextField orderNumberField;
 
-    protected JTextField placeField;
-    protected JTextField streetField;
-    protected JTextField patronSaintField;
-    protected JTextField secondPatronSaintField;
-    protected JTextField phoneNumberField;
-    protected JTextField orderNumberField;
+    private JTextArea noteField;
+    private JCheckBox blessedHomeCheckbox;
 
-    protected JTextArea noteField;
+    private JButton saveButton;
+    private JButton deleteButton;
 
-    protected JCheckBox blessedHomeField;
+    private GridBagConstraints gbc;
 
-    protected JButton saveChangesButton;
-    protected JButton deleteButton;
+    private FamilyFormListener listener;
+    private Family family;
 
-    protected GridBagLayout layout;
-    protected GridBagConstraints gridBagConstraints;
-
-    protected FamilyFormListener familyFormListener;
-
-    protected Family family;
-
-    protected JScrollPane scrollPane;
-
-    public FamilyForm() {
-        family = null;
+    public FamilyForm(FamilyFormListener listener) {
+        this.listener = listener;
         initComponents();
     }
 
-    public FamilyForm(FamilyFormListener familyFormListener) {
-        this();
-        this.familyFormListener = familyFormListener;
+    /* =========================
+       Initialization
+       ========================= */
+
+    private void initComponents() {
+        initLayout();
+        initFields();
+        initButtons();
+        initNavigation();
     }
-    
-    public void initComponents() {
-        this.layout = new GridBagLayout();
-        this.gridBagConstraints = new GridBagConstraints();
-        this.setLayout(this.layout);
 
-        this.gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        this.gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+    private void initLayout() {
+        setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+    }
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 0;
+    private void highlightCheckboxFocus(JCheckBox checkBox) {
+        checkBox.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                checkBox.getModel().setRollover(true);
+            }
 
-        placeLabel = new JLabel("Мјесто:");
-        this.add(placeLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        placeField = new JTextField(15);
-        this.add(placeField, this.gridBagConstraints);
+            @Override
+            public void focusLost(FocusEvent e) {
+                checkBox.getModel().setRollover(false);
+            }
+        });
+    }
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 1;
 
-        streetLabel = new JLabel("Улица:");
-        this.add(streetLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        streetField = new JTextField(15);
-        this.add(streetField, this.gridBagConstraints);
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 2;
+    private void initFields() {
+        addRow(0, "Мјесто:", placeField = new JTextField(15));
+        addRow(1, "Улица:", streetField = new JTextField(15));
+        addRow(2, "Крсна слава:", patronSaintField = new JTextField(15));
+        addRow(3, "Преслава:", secondPatronSaintField = new JTextField(15));
+        addRow(4, "Дом освештан:", blessedHomeCheckbox = new JCheckBox());
+        addRow(5, "Број телефона:", phoneNumberField = new JTextField(15));
+        addRow(6, "Редни број:", orderNumberField = new JTextField());
+        highlightCheckboxFocus(blessedHomeCheckbox);
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        add(new JLabel("Напомена:"), gbc);
 
-        patronSaintLabel = new JLabel("Крсна слава:");
-        this.add(patronSaintLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        patronSaintField = new JTextField(15);
-        this.add(patronSaintField, this.gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 3;
-
-        secondPatronSaintLabel = new JLabel("Преслава:");
-        this.add(secondPatronSaintLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        secondPatronSaintField = new JTextField(15);
-        this.add(secondPatronSaintField, this.gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 4;
-
-        blessedHomeLabel = new JLabel("Дом освештан:");
-        this.add(blessedHomeLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        blessedHomeField = new JCheckBox();
-        this.add(blessedHomeField, this.gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 5;
-
-        phoneNumberLabel = new JLabel("Број телефона:");
-        this.add(phoneNumberLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        phoneNumberField = new JTextField(15);
-        this.add(phoneNumberField, this.gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 6;
-        orderNumberLabel = new JLabel("Редни број:");
-        this.add(orderNumberLabel, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 1;
-        orderNumberField = new JTextField();
-        this.add(orderNumberField, this.gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 7;
-        noteLabel = new JLabel("Напомена:");
-        this.add(noteLabel, this.gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 1;
         noteField = new JTextArea();
         noteField.setLineWrap(true);
         noteField.setWrapStyleWord(true);
 
-        scrollPane = new JScrollPane(noteField);
+        JScrollPane scrollPane = new JScrollPane(noteField);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(new Dimension(180, 80));
-        this.add(scrollPane, this.gridBagConstraints);
 
-        saveChangesButton = new JButton("Сачувај измјене");
+        gbc.gridx = 1;
+        add(scrollPane, gbc);
+    }
 
-        this.gridBagConstraints.gridy = 8;
-        this.add(saveChangesButton, this.gridBagConstraints);
-        this.gridBagConstraints.gridx = 0;
+    private void initButtons() {
+        gbc.gridy = 8;
+        saveButton = new JButton("Сачувај измјене");
+        add(saveButton, gbc);
+
+        gbc.gridx = 0;
         deleteButton = new JButton("Избриши");
-        this.add(deleteButton, this.gridBagConstraints);
-  
-        deleteButton.addActionListener(e -> {
-            this.familyFormListener.onDelete(this.family.getId());
-        });
+        add(deleteButton, gbc);
 
-        saveChangesButton.addActionListener(e -> {
-            int orderNumber ;
+        saveButton.addActionListener(e -> onSave());
+        deleteButton.addActionListener(e -> onDelete());
+    }
 
-            if (orderNumberField.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Редни број је обавезно поље!", "Грешка", JOptionPane.ERROR_MESSAGE);
-                return;
-            } else {
-                try {
-                    orderNumber = Integer.parseInt(orderNumberField.getText());
-                    if (orderNumber <= 0) {
-                        JOptionPane.showMessageDialog(this, "Редни број треба да је искључиво број већи или једнак од 1!", "Грешка", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Редни број треба да је искључиво број!", "Грешка", JOptionPane.ERROR_MESSAGE);
-                    return;
+    /* =========================
+       Navigation
+       ========================= */
+
+    private void initNavigation() {
+        configureNavigation(placeField, false,true);
+        configureNavigation(streetField, true,true);
+        configureNavigation(patronSaintField, true,true);
+        configureNavigation(secondPatronSaintField, true,true);
+        configureNavigation(blessedHomeCheckbox, true,true);
+        configureNavigation(phoneNumberField, true,true);
+        configureNavigation(orderNumberField, true,true);
+    }
+
+    /**
+     * Configures keyboard navigation for a component:
+     *  - ENTER: moves focus to the next component
+     *  - UP: moves focus to the previous component
+     *  - DOWN: (if allowed) moves focus to the next component
+     */
+    private void configureNavigation(JComponent component, boolean allowUp, boolean allowDown) {
+        InputMap im = component.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap am = component.getActionMap();
+
+        im.put(KeyStroke.getKeyStroke("ENTER"), "enter");
+        im.put(KeyStroke.getKeyStroke("UP"), "up");
+
+        if(allowUp){
+            am.put("up", new AbstractAction() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    component.transferFocusBackward();
                 }
+            });
+        }
+
+        if (allowDown) {
+            im.put(KeyStroke.getKeyStroke("DOWN"), "down");
+            am.put("down", new AbstractAction() {
+                @Override
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    component.transferFocus();
+                }
+            });
+        }
+
+        am.put("enter", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                component.transferFocus();
             }
-
-            Long id = (this.family != null) ? this.family.getId() : null;
-            Long hostId = (this.family != null) ? this.family.getHostId() : null;
-
-            Family family = new Family(id, placeField.getText(), streetField.getText(), patronSaintField.getText(),
-                    secondPatronSaintField.getText(), blessedHomeField.isSelected(), phoneNumberField.getText(),
-                    orderNumber, noteField.getText(), hostId);
-
-            this.familyFormListener.onSaveFamily(family);
         });
     }
 
-    protected void resetFamilyFields() {
-        placeField.setText("");
-        patronSaintField.setText("");
-        streetField.setText("");
-        secondPatronSaintField.setText("");
-        blessedHomeField.setSelected(false);
-        phoneNumberField.setText("");
-        orderNumberField.setText("");
-        noteField.setText("");
+    /* =========================
+       Actions
+       ========================= */
+
+    private void onSave() {
+        Integer orderNumber = parseOrderNumber();
+        if (orderNumber == null) return;
+
+        Long id = family != null ? family.getId() : null;
+        Long hostId = family != null ? family.getHostId() : null;
+
+        Family updatedFamily = new Family(
+                id,
+                placeField.getText(),
+                streetField.getText(),
+                patronSaintField.getText(),
+                secondPatronSaintField.getText(),
+                blessedHomeCheckbox.isSelected(),
+                phoneNumberField.getText(),
+                orderNumber,
+                noteField.getText(),
+                hostId
+        );
+
+        listener.onSaveFamily(updatedFamily);
     }
 
-    protected void setFamily(Family family) {
+    private void onDelete() {
+        if (family != null) {
+            listener.onDelete(family.getId());
+        }
+    }
+
+    private Integer parseOrderNumber() {
+        String text = orderNumberField.getText();
+
+        if (text.isEmpty()) {
+            showError("Редни број је обавезно поље!");
+            return null;
+        }
+
+        try {
+            int value = Integer.parseInt(text);
+            if (value <= 0) {
+                showError("Редни број мора бити већи или једнак 1!");
+                return null;
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            showError("Редни број мора бити број!");
+            return null;
+        }
+    }
+
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(this, message, "Грешка", JOptionPane.ERROR_MESSAGE);
+    }
+
+    /* =========================
+       Helpers
+       ========================= */
+
+    private void addRow(int row, String label, JComponent field) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        add(new JLabel(label), gbc);
+
+        gbc.gridx = 1;
+        add(field, gbc);
+    }
+
+    public void setFamily(Family family) {
         this.family = family;
+
         placeField.setText(family.getPlace());
-        patronSaintField.setText(family.getPatronSaint());
         streetField.setText(family.getStreet());
+        patronSaintField.setText(family.getPatronSaint());
         secondPatronSaintField.setText(family.getSecondPatronSaint());
-        blessedHomeField.setSelected(family.isBlessedHome());
+        blessedHomeCheckbox.setSelected(family.isBlessedHome());
         phoneNumberField.setText(family.getPhoneNumber());
         orderNumberField.setText(family.getOrderNumber().toString());
         noteField.setText(family.getNote());
     }
 
+    public void resetForm() {
+        placeField.setText("");
+        streetField.setText("");
+        patronSaintField.setText("");
+        secondPatronSaintField.setText("");
+        phoneNumberField.setText("");
+        orderNumberField.setText("");
+        noteField.setText("");
+        blessedHomeCheckbox.setSelected(false);
+        family = null;
+    }
+
+    public JButton getSaveButton() {
+        return saveButton;
+    }
+
+    public JButton getDeleteButton() {
+        return deleteButton;
+    }
 }
+

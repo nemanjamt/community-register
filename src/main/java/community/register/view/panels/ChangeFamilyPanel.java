@@ -26,8 +26,8 @@ public class ChangeFamilyPanel extends FamilyPanel {
 
     @Override
     void reset() {
-        super.familyMemberForm.resetFamilyMemberFields();
-        super.familyForm.resetFamilyFields();
+        super.familyMemberForm.resetForm();
+        super.familyForm.resetForm();
         super.tableModel.reset();
         
         TableColumn idColumn = super.table.getColumnModel().getColumn(0);

@@ -110,7 +110,21 @@ public class FamilyDAO implements CrudDAO<Family> {
 
     @Override
     public boolean delete(Long id) {
-        return familyList.removeIf(family -> family.getId().equals(id));
+        Family family = familyList.stream().filter(f -> f.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+        if(family == null) {return false;}
+        Integer orderNumber  = family.getOrderNumber();
+        decreaseOrderValues(orderNumber);
+        return familyList.remove(family);
+    }
+
+    private void decreaseOrderValues(Integer orderNumber) {
+        for(Family family : familyList) {
+            if(family.getOrderNumber() > orderNumber) {
+                family.setOrderNumber(family.getOrderNumber()-1);
+            }
+        }
     }
 
     public List<Family> getFamilyList() {

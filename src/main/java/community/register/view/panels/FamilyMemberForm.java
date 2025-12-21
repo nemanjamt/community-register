@@ -5,153 +5,217 @@ import community.register.utils.FamilyMemberFormListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class FamilyMemberForm extends JPanel {
 
-    protected JTextField nameField;
-    protected JTextField birthDateField;
-    protected JTextField lastNameField;
-    protected JTextField relationshipField;
+    private JTextField nameField;
+    private JTextField lastNameField;
+    private JTextField birthDateField;
+    private JTextField relationshipField;
 
-    protected JCheckBox baptizedCheckbox;
-    protected JCheckBox marriedCheckbox;
-    protected JCheckBox hostCheckbox;
+    private JCheckBox baptizedCheckbox;
+    private JCheckBox marriedCheckbox;
+    private JCheckBox hostCheckbox;
 
-    protected JButton saveButton;
+    private JButton saveButton;
 
-    protected GridBagConstraints gridBagConstraints;
-    protected GridBagLayout layout;
+    private GridBagConstraints gbc;
 
-    protected JLabel nameLabel;
-    protected JLabel birthDateLabel;
-    protected JLabel lastNameLabel;
-    protected JLabel baptizedLabel;
-    protected JLabel marriedLabel;
-    protected JLabel hostLabel;
-    protected JLabel relationshipLabel;
+    private final FamilyMemberFormListener listener;
 
-    private FamilyMemberFormListener familyMemberFormListener;
-
-    public FamilyMemberForm() {
+    public FamilyMemberForm(FamilyMemberFormListener listener) {
+        this.listener = listener;
         initComponents();
     }
-    public FamilyMemberForm(FamilyMemberFormListener familyMemberFormListener) {
-        this();
-        this.familyMemberFormListener = familyMemberFormListener;
-    }
+
+    /* =========================
+       Initialization
+       ========================= */
 
     private void initComponents() {
-        this.layout = new GridBagLayout();
-        this.gridBagConstraints = new GridBagConstraints();
-        this.setLayout(this.layout);
+        initLayout();
+        initFields();
+        initSaveButton();
+        initNavigation();
+    }
 
-        this.gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-        this.gridBagConstraints.insets = new Insets(5, 5, 5, 5);
+    private void initLayout() {
+        setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+    }
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 0;
-        this.nameLabel = new JLabel("Име:");
-        this.add(this.nameLabel, gridBagConstraints);
+    private void initFields() {
+        addRow(0, "Име:", nameField = new JTextField(15));
+        addRow(1, "Презиме:", lastNameField = new JTextField(15));
+        addRow(2, "Датум рођења:", birthDateField = new JTextField(15));
+        addRow(3, "Крштен:", baptizedCheckbox = new JCheckBox());
+        addRow(4, "Вјенчан:", marriedCheckbox = new JCheckBox());
+        addRow(5, "Сродство са домаћином:", relationshipField = new JTextField(15));
+        addRow(6, "Домаћин:", hostCheckbox = new JCheckBox());
+        highlightCheckboxFocus(baptizedCheckbox);
+        highlightCheckboxFocus(marriedCheckbox);
+        highlightCheckboxFocus(hostCheckbox);
+    }
 
-        this.gridBagConstraints.gridx = 1;
-        this.nameField = new JTextField(15);
-        this.add(nameField, gridBagConstraints);
+    private void initSaveButton() {
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        saveButton = new JButton("Сачувај");
+        add(saveButton, gbc);
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 1;
-        this.lastNameLabel = new JLabel("Презиме:");
-        this.add(this.lastNameLabel, gridBagConstraints);
+        saveButton.addActionListener(e -> onSave());
+        simulateArrowFocus(saveButton);
+    }
 
-        this.gridBagConstraints.gridx = 1;
-        this.lastNameField = new JTextField(15);
-        this.add(lastNameField, gridBagConstraints);
+    /* =========================
+       Navigation / Key bindings
+       ========================= */
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 2;
-        this.birthDateLabel = new JLabel("Датум рођења:");
-        this.add(this.birthDateLabel, gridBagConstraints);
+    private void initNavigation() {
+        configureNavigation(nameField, false,true);
+        configureNavigation(lastNameField, true,true);
+        configureNavigation(birthDateField, true,true);
+        configureNavigation(relationshipField, true,true);
+        configureNavigation(baptizedCheckbox, true,true);
+        configureNavigation(marriedCheckbox, true,true);
+        configureNavigation(hostCheckbox, true,true);
+        configureNavigation(saveButton, true,false); // button: ENTER = save, arrows = focus
+    }
 
-        this.gridBagConstraints.gridx = 1;
-        this.birthDateField = new JTextField(15);
-        this.add(birthDateField, gridBagConstraints);
+    /**
+     * Configures keyboard navigation for a component:
+     *  - ENTER: moves focus to the next component or clicks the button
+     *  - UP: moves focus to the previous component
+     *  - DOWN: (if allowed) moves focus to the next component
+     */
+    private void configureNavigation(JComponent component, boolean allowUp, boolean allowDown) {
+        InputMap im = component.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap am = component.getActionMap();
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 3;
-        this.baptizedLabel = new JLabel("Крштен:");
-        this.add(this.baptizedLabel, gridBagConstraints);
+        im.put(KeyStroke.getKeyStroke("ENTER"), "enter");
 
-        this.gridBagConstraints.gridx = 1;
-        this.baptizedCheckbox = new JCheckBox();
-        this.add(baptizedCheckbox, gridBagConstraints);
+        if(allowUp){
+            im.put(KeyStroke.getKeyStroke("UP"), "up");
+            am.put("up", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    component.transferFocusBackward();
+                }
+            });
+        }
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 4;
-        this.marriedLabel = new JLabel("Вјенчан:");
-        this.add(this.marriedLabel, gridBagConstraints);
+        if (allowDown) {
+            im.put(KeyStroke.getKeyStroke("DOWN"), "down");
+            am.put("down", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    component.transferFocus();
+                }
+            });
 
-        this.gridBagConstraints.gridx = 1;
-        this.marriedCheckbox = new JCheckBox();
-        this.add(marriedCheckbox, gridBagConstraints);
+        }
 
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 5;
-        this.relationshipLabel = new JLabel("Сродство са домаћином:");
-        this.add(this.relationshipLabel, gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 1;
-        this.relationshipField = new JTextField(15);
-        this.add(relationshipField, gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 0;
-        this.gridBagConstraints.gridy = 6;
-        this.hostLabel = new JLabel("Домаћин:");
-        this.add(this.hostLabel, gridBagConstraints);
-
-        this.gridBagConstraints.gridx = 1;
-        this.hostCheckbox = new JCheckBox();
-        this.add(hostCheckbox, gridBagConstraints);
-
-        this.gridBagConstraints.gridy = 7;
-        this.saveButton = new JButton("Сачувај");
-        this.add(saveButton, gridBagConstraints);
-
-        this.saveButton.addActionListener(e -> {
-            Long id = System.currentTimeMillis();
-            String name = nameField.getText();
-            String lastName = lastNameField.getText();
-            String birthDate = birthDateField.getText();
-            boolean baptized = baptizedCheckbox.isSelected();
-            boolean married = marriedCheckbox.isSelected();
-            String relationship = relationshipField.getText();
-            boolean host = hostCheckbox.isSelected();
-
-            FamilyMember familyMember = new FamilyMember(id, relationship, married, baptized, birthDate, name, lastName, host);
-
-            this.familyMemberFormListener.onSaveFamilyMember(familyMember);
-
-            this.resetFamilyMemberFields();
+        am.put("enter", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (component instanceof JButton button) {
+                    button.doClick();
+                    nameField.requestFocus();
+                } else {
+                    component.transferFocus();
+                }
+            }
         });
     }
 
-    protected void setFamilyMember(FamilyMember familyMember) {
-        nameField.setText(familyMember.getName());
-        lastNameField.setText(familyMember.getLastName());
-        birthDateField.setText(familyMember.getBirthday());
-        baptizedCheckbox.setSelected(familyMember.isBaptized());
-        marriedCheckbox.setSelected(familyMember.isMarried());
-        relationshipField.setText(familyMember.getRelationshipWithHost());
-        hostCheckbox.setSelected(familyMember.isHost());
+    /* =========================
+       Actions
+       ========================= */
+
+    private void onSave() {
+        FamilyMember member = readForm();
+        listener.onSaveFamilyMember(member);
+        resetForm();
     }
 
-    protected void resetFamilyMemberFields() {
+    private FamilyMember readForm() {
+        Long id = System.currentTimeMillis();
+        return new FamilyMember(
+                id,
+                relationshipField.getText(),
+                marriedCheckbox.isSelected(),
+                baptizedCheckbox.isSelected(),
+                birthDateField.getText(),
+                nameField.getText(),
+                lastNameField.getText(),
+                hostCheckbox.isSelected()
+        );
+    }
+
+    /* =========================
+       Helpers
+       ========================= */
+
+    private void addRow(int row, String label, JComponent field) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        add(new JLabel(label), gbc);
+
+        gbc.gridx = 1;
+        add(field, gbc);
+    }
+
+    private void highlightCheckboxFocus(JCheckBox checkBox) {
+        checkBox.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                checkBox.getModel().setRollover(true);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                checkBox.getModel().setRollover(false);
+            }
+        });
+    }
+
+    public void setFamilyMember(FamilyMember member) {
+        nameField.setText(member.getName());
+        lastNameField.setText(member.getLastName());
+        birthDateField.setText(member.getBirthday());
+        baptizedCheckbox.setSelected(member.isBaptized());
+        marriedCheckbox.setSelected(member.isMarried());
+        relationshipField.setText(member.getRelationshipWithHost());
+        hostCheckbox.setSelected(member.isHost());
+    }
+
+    public void resetForm() {
         nameField.setText("");
         lastNameField.setText("");
         birthDateField.setText("");
+        relationshipField.setText("");
         baptizedCheckbox.setSelected(false);
         marriedCheckbox.setSelected(false);
-        relationshipField.setText("");
         hostCheckbox.setSelected(false);
     }
+    private void simulateArrowFocus(JButton button) {
+        button.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                button.setFocusPainted(false);
+                button.getModel().setRollover(true);
+            }
 
-
+            @Override
+            public void focusLost(FocusEvent e) {
+                button.getModel().setRollover(false);
+            }
+        });
+    }
 }
+
